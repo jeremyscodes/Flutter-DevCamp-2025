@@ -76,7 +76,7 @@ class _LoginPage extends State<LoginPage>  {
                   );
                 }),
                 const Text(
-                  "Don't have an account??",
+                  "Don't have an account?",
                   style: TextStyle(color: Colors.white),
                 ),
               ]),

@@ -31,7 +31,12 @@ class _LandingPageState extends State<LandingPage> {
             SizedBox(height: MediaQuery.sizeOf(context).height * 0.02),
             const Text("Don't have an account?" , style: TextStyle(color: Colors.white),),
             SizedBox(height: MediaQuery.sizeOf(context).height * 0.07 ),
-            const Text("Continue as guest" , style: TextStyle(color: Colors.white),),
+            new GestureDetector(
+              onTap: () {
+                  Navigator.pushNamed(context, "/singleProductPage");
+                },
+              child: const Text("Continue as guest" , style: TextStyle(color: Colors.white),),
+            ),
           ],
         ),
       )
