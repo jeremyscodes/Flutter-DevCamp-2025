@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/widgets.dart';
+import 'package:readmore/readmore.dart';
 
 import '../../widgets/BlueGradientButton.dart';
 
@@ -13,8 +14,20 @@ class SingleProductPage extends StatefulWidget {
 
 final List<String> imagePaths = [
   'lib/assets/lamp_product_img.jpg',
+  'lib/assets/cleanerProject.jpg',
   'lib/assets/lamp_product_img.jpg',
-  'lib/assets/lamp_product_img.jpg',
+];
+class ProductCard  {
+  String title;
+  String imagePath;
+  String price;
+
+  ProductCard(this.title, this.imagePath, this.price);
+}
+final List<ProductCard> productCardsList =  [
+   ProductCard('Product title',imagePaths[0],"from R350 p/m"),
+   ProductCard('Product title',imagePaths[1],"from R350 p/m"),
+   ProductCard('Product title',imagePaths[2],"from R350 p/m")
 ];
 
 class _SingleProductPageState extends State<SingleProductPage> {
@@ -50,8 +63,14 @@ class _SingleProductPageState extends State<SingleProductPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  const ReadMoreText(
                     "Our comprehensive coverage ensures that your devices are protected against a wide range of mishaps.",
+                    trimMode: TrimMode.Line,
+                    trimLines: 2,
+                    colorClickableText: Colors.blue,
+                    trimCollapsedText: 'Read more',
+                    trimExpandedText: 'Read less',
+                    // moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   const Divider(),
                   const Text("Benefits"),
@@ -64,45 +83,8 @@ class _SingleProductPageState extends State<SingleProductPage> {
                     "Proof of purchase\nValid identification\nProduct serial number",
                   ),
                   const Divider(),
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      height: 192.0,
-                      enlargeCenterPage: false,
-                      enableInfiniteScroll: false,
-                      autoPlay: true,
-                    ),
-                    items: imagePaths.map((path) {
-                      return Builder(
-                        builder: (BuildContext context) {
-                          return Container(
-                            padding: const EdgeInsets.all(12.0),
-                            width: MediaQuery.of(context).size.width,
-                            height: 192.0,
-                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey.shade200,
-                            ),
-                            child: ClipRRect(
-
-                              borderRadius: BorderRadius.circular(15),
-                              child: Column(
-                                children: [
-                                  Image.asset(
-                                    path,
-                                    fit: BoxFit.fitWidth,
-                                  ),
-                                  Text('Product title'),
-                                  Text('from R350 p/m'),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ],
+                  ProductList()
+              ],
               ),
             ),
           ),
@@ -119,8 +101,15 @@ class _SingleProductPageState extends State<SingleProductPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('R350.00', style: TextStyle(fontSize: 18)),
+                const Column(
+                    children: [
+                      Text('R350.00', style: TextStyle(fontSize: 18)),
+                      Text('per month')
+                    ]
+                ),
                 BlueGradientButton(
+                  text: "Add to cart",
+                  width: MediaQuery.of(context).size.width * 0.5,
                   onPressed: () {
                     Navigator.pushNamed(context, '/login');
                   },
@@ -133,3 +122,75 @@ class _SingleProductPageState extends State<SingleProductPage> {
     );
   }
 }
+
+class _SampleCard extends StatelessWidget {
+  final ProductCard card;
+  const _SampleCard(this.card);
+
+  @override
+  Widget build(BuildContext context) {
+    var cardWidth= MediaQuery.of(context).size.width * 0.75;
+
+    return Container(
+        padding: const EdgeInsets.all(12.0),
+        width: cardWidth,
+        height: 192,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                height: 120,
+                width: cardWidth,
+                child: Image(
+                  image: AssetImage(card.imagePath),
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+              Text(card.title),
+              Text(card.price),
+          ],
+        )
+    );
+  }
+}
+
+class ProductList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 250,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.all(8),
+        itemCount: productCardsList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Card.outlined(child:_SampleCard(productCardsList[index]));
+        }
+      ),
+    );
+  }
+}
+
+// class ProductCarousel extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return CarouselSlider(
+//       options: CarouselOptions(
+//         enlargeCenterPage: false,
+//         enableInfiniteScroll: false,
+//         autoPlay: true,
+//       ),
+//       items: imagePaths.map((path) {
+//         return Builder(
+//           builder: (BuildContext context) {
+//             return Card.outlined(child: _SampleCard(productTitle: 'Product title',path:imagePaths[0],price: "from R350 p/m",));
+//           },
+//         );
+//       }).toList(),
+//     );
+//   }
+// }
