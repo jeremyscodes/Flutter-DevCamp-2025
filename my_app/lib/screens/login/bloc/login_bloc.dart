@@ -24,7 +24,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       isButtonEnabled: event.password.isNotEmpty && state.email.isNotEmpty,));
     log('Password changed');
     log('Password: ${event.password}');
-    log(  'Email: ${state.email}');
+    log('Email: ${state.email}');
     log('button enabled: ${state.isButtonEnabled}');
   }
   void loginSubmitted(event, emit) {

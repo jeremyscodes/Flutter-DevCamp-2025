@@ -24,6 +24,7 @@ class _LandingPageState extends State<LandingPage> {
             const Text("InsureTechGuard?" , style: TextStyle(color: Colors.white),),
             SizedBox(height: MediaQuery.sizeOf(context).height * 0.3),
             BlueGradientButton(
+              text: "Login",
               onPressed: () {
                 Navigator.pushNamed(context, '/login');
               },
