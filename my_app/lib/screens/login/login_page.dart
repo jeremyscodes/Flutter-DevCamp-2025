@@ -56,13 +56,16 @@ class _LoginPage extends State<LoginPage> {
                             _StyledTextField(
                               label: "Email",
                               eventBuilder: (value) => EmailChanged(value),
+                              autoFocus: true,
                               obscureText: false,
                             ),
                             SizedBox(
-                                height: MediaQuery.sizeOf(context).height * 0.02),
+                                height:
+                                    MediaQuery.sizeOf(context).height * 0.02),
                             _StyledTextField(
                               label: "Password",
                               eventBuilder: (value) => PasswordChanged(value),
+                              autoFocus: false,
                               obscureText: true,
                             ),
                           ],
@@ -95,32 +98,57 @@ class _LoginPage extends State<LoginPage> {
   }
 }
 
-class _StyledTextField extends StatelessWidget {
+class _StyledTextField extends StatefulWidget {
   final String label;
+  final bool autoFocus;
   final bool obscureText;
   final LoginEvent Function(String value) eventBuilder;
 
   const _StyledTextField({
     super.key,
+    this.autoFocus = false,
     this.obscureText = false,
     required this.label,
     required this.eventBuilder,
   });
 
   @override
+  State<_StyledTextField> createState() => _StyledTextFieldState();
+}
+
+class _StyledTextFieldState extends State<_StyledTextField> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width * 0.85,
       child: TextField(
+        autofocus: widget.autoFocus,
         style: const TextStyle(color: Colors.white),
         onChanged: (value) {
           // `value` is the latest text entered by the user
-          context.read<LoginBloc>().add(eventBuilder(value));
+          context.read<LoginBloc>().add(widget.eventBuilder(value));
         },
-        obscureText: obscureText,
+        obscureText: _obscureText,
         decoration: InputDecoration(
-          labelText: label,
+          labelText: widget.label,
           labelStyle: const TextStyle(color: Colors.white),
+          suffixIcon: widget.obscureText ?
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+            child: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+          ) : null,
           focusedBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white, width: 3),
           ),
