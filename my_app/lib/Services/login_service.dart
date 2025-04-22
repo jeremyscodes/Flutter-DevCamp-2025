@@ -29,4 +29,29 @@ class AuthService {
       return null;
     }
   }
+  Future<bool> validate({required String token}) async {
+    print('Token to validate');
+    print(token);
+    final url = Uri.parse('http://10.0.2.2:8080/v1/token/validate');
+    final String bearerToken = 'Bearer $token';
+    
+    final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': bearerToken,
+        }
+    );
+    print(response.statusCode);
+    if (response.statusCode == 204) {
+      // Validate successful
+      print('validation successful');
+
+      return true;
+    } else {
+      print('validation failed');
+      // Login failed
+      return false;
+    }
+  }
 }

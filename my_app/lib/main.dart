@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/landing_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_app/Services/login_service.dart';
+import 'package:my_app/screens/landing_page/bloc/landing_bloc.dart';
+import 'package:my_app/screens/landing_page/landing_page.dart';
+import 'package:my_app/repository/auth_repository.dart';
 import 'package:my_app/screens/login/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:my_app/screens/single_product/single_product_page.dart';
+import 'package:my_app/storage/secure_storage.dart';
 import 'package:my_app/theme/app_theme.dart';
 import 'firebase_options.dart';
 
@@ -11,28 +16,38 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  final authService = AuthService();
+  final storageService = SecureStorageService();
+  final authRepository = AuthRepository(authService, storageService);
+  runApp(MyApp(authRepository: authRepository));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthRepository _authRepository;
+
+  const MyApp({super.key, required AuthRepository authRepository})
+      : _authRepository = authRepository;
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: appTheme,
-      home: LandingPage(),
+        title: 'Flutter Demo',
+        theme: appTheme,
+        home: BlocProvider(
+          create: (context) => LandingBloc(authRepository: _authRepository),
+          child: LandingPage(
+            authRepository: _authRepository,
+          ),
+        ),
         // const MyHomePage(title: 'Flutter Demo Home Page'),
         // initialRoute: '/',
         routes: {
-        // '/': (context) => const LandingPage(),
-        '/login': (context) => const LoginPage(),
+          // '/': (context) => const LandingPage(),
+          '/login': (context) => const LoginPage(),
           '/singleProductPage': (context) => const SingleProductPage(),
           // '/home': (context) => const HomePage(),
-      }
-    );
+        });
   }
 }
 

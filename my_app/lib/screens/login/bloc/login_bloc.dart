@@ -6,7 +6,6 @@ import 'package:formz/formz.dart';
 import 'package:meta/meta.dart';
 import 'package:my_app/repository/auth_repository.dart';
 import 'package:my_app/screens/login/bloc/login_state.dart';
-import 'package:http/http.dart' as http;
 
 part 'login_event.dart';
 
@@ -17,20 +16,32 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<EmailChanged>(updateEmail);
     on<PasswordChanged>(updatePassword);
     on<LoginSubmitted>(loginSubmitted);
+  }
 
-  }
   void updateEmail(event, emit) {
-    emit(state.copyWith(email: event.email,
-      isButtonEnabled: event.email.isNotEmpty && state.password.isNotEmpty,));
+    String email = event.email;
+    if (email.contains('@') && email.contains('.')) {
+      emit(state.copyWith(
+        email: event.email,
+        isButtonEnabled: state.password.isNotEmpty,
+        status: FormzStatus.valid
+      ));
+    } else {
+      emit(state.copyWith(status: FormzStatus.invalid));
+    }
   }
+
   void updatePassword(event, emit) {
-    emit(state.copyWith(password: event.password,
-      isButtonEnabled: event.password.isNotEmpty && state.email.isNotEmpty,));
+    emit(state.copyWith(
+      password: event.password,
+      isButtonEnabled: event.password.isNotEmpty && state.email.isNotEmpty,
+    ));
     log('Password changed');
     log('Password: ${event.password}');
     log('Email: ${state.email}');
     log('button enabled: ${state.isButtonEnabled}');
   }
+
   Future<void> loginSubmitted(event, emit) async {
     emit(state.copyWith(status: FormzStatus.submissionInProgress));
     log('Login submitted');
@@ -38,9 +49,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     log('Password: ${state.password}');
 
     try {
+      print("fetching token");
       final token = await authRepository.login(state.email, state.password);
+      //TODO: check that token has not expired
       if (token != null) {
         log('login successful');
+        print(token);
         emit(state.copyWith(status: FormzStatus.submissionSuccess));
       } else {
         log('login failed');
@@ -49,13 +63,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           errorMessage: 'Invalid email or password',
         ));
       }
-    } catch(e) {
+    } catch (e) {
       log('login failed');
       emit(state.copyWith(
-        status: FormzStatus.submissionFailure,
-        errorMessage: 'Login failed. Please try again.'
-      ));
+          status: FormzStatus.submissionFailure,
+          errorMessage: 'Login failed. Please try again.'));
     }
   }
 }
-

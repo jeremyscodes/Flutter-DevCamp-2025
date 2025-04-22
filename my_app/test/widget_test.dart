@@ -7,13 +7,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:my_app/Services/login_service.dart';
 
 import 'package:my_app/main.dart';
+import 'package:my_app/repository/auth_repository.dart';
+import 'package:my_app/storage/secure_storage.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    final authService = AuthService();
+    final storageService = SecureStorageService();
+    final authRepository = AuthRepository(authService,storageService);
+    await tester.pumpWidget(MyApp(authRepository: authRepository,));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

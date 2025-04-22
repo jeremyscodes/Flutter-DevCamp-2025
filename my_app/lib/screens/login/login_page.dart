@@ -5,6 +5,7 @@ import 'package:my_app/Services/login_service.dart';
 import 'package:my_app/repository/auth_repository.dart';
 import 'package:my_app/screens/login/bloc/login_bloc.dart';
 import 'package:my_app/screens/login/bloc/login_state.dart';
+import 'package:my_app/storage/secure_storage.dart';
 import 'package:my_app/widgets/BlueGradientButton.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,7 +23,7 @@ class _LoginPage extends State<LoginPage> {
         backgroundColor: const Color.fromRGBO(28, 36, 53, 1),
         body: BlocProvider(
           create: (context) =>
-              LoginBloc(authRepository: AuthRepository(AuthService())),
+              LoginBloc(authRepository: AuthRepository(AuthService(),SecureStorageService())),
           child: BlocListener<LoginBloc, LoginState>(
             listenWhen: (previous, current) =>
                 previous.status != current.status,
@@ -51,24 +52,42 @@ class _LoginPage extends State<LoginPage> {
                         ),
                         SizedBox(
                             height: MediaQuery.sizeOf(context).height * 0.03),
-                        Column(
-                          children: <Widget>[
-                            _StyledTextField(
-                              label: "Email",
-                              eventBuilder: (value) => EmailChanged(value),
-                              autoFocus: true,
-                              obscureText: false,
-                            ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.sizeOf(context).height * 0.02),
-                            _StyledTextField(
-                              label: "Password",
-                              eventBuilder: (value) => PasswordChanged(value),
-                              autoFocus: false,
-                              obscureText: true,
-                            ),
-                          ],
+                        BlocBuilder<LoginBloc, LoginState>(
+                          builder: (context, state) {
+                            return Column(
+                              children: <Widget>[
+                                _StyledTextField(
+                                  label: "Email",
+                                  eventBuilder: (value) => EmailChanged(value),
+                                  autoFocus: true,
+                                  obscureText: false,
+                                  status: state,
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.sizeOf(context).height *
+                                        0.02),
+                                _StyledTextField(
+                                  label: "Password",
+                                  eventBuilder: (value) =>
+                                      PasswordChanged(value),
+                                  autoFocus: false,
+                                  obscureText: true,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        BlocBuilder<LoginBloc, LoginState>(
+                          builder: (context, state) {
+                            if (state.status == FormzStatus.submissionFailure) {
+                              return const Text(
+                                'Email or Password incorrect',
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 20),
+                              );
+                            }
+                            return const Text('');
+                          },
                         ),
                         SizedBox(
                             height: MediaQuery.sizeOf(context).height * 0.02),
@@ -103,6 +122,7 @@ class _StyledTextField extends StatefulWidget {
   final bool autoFocus;
   final bool obscureText;
   final LoginEvent Function(String value) eventBuilder;
+  final LoginState? status;
 
   const _StyledTextField({
     super.key,
@@ -110,6 +130,7 @@ class _StyledTextField extends StatefulWidget {
     this.obscureText = false,
     required this.label,
     required this.eventBuilder,
+    this.status,
   });
 
   @override
@@ -127,36 +148,57 @@ class _StyledTextFieldState extends State<_StyledTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width * 0.85,
-      child: TextField(
-        autofocus: widget.autoFocus,
-        style: const TextStyle(color: Colors.white),
-        onChanged: (value) {
-          // `value` is the latest text entered by the user
-          context.read<LoginBloc>().add(widget.eventBuilder(value));
-        },
-        obscureText: _obscureText,
-        decoration: InputDecoration(
-          labelText: widget.label,
-          labelStyle: const TextStyle(color: Colors.white),
-          suffixIcon: widget.obscureText ?
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _obscureText = !_obscureText;
-              });
+    bool isInvalid = widget.label == "Email" &&
+        widget.status != null &&
+        widget.status?.status == FormzStatus.invalid;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: MediaQuery.sizeOf(context).width * 0.85,
+          child: TextField(
+            autofocus: widget.autoFocus,
+            style: const TextStyle(color: Colors.white),
+            onChanged: (value) {
+              // `value` is the latest text entered by the user
+              context.read<LoginBloc>().add(widget.eventBuilder(value));
             },
-            child: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
-          ) : null,
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white, width: 3),
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white, width: 1),
+            obscureText: _obscureText,
+            decoration: InputDecoration(
+              labelText: widget.label,
+              labelStyle: const TextStyle(color: Colors.white),
+              suffixIcon: widget.obscureText
+                  ? GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                      child: Icon(_obscureText
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                    )
+                  : null,
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: isInvalid ? Colors.red : Colors.white, width: 2),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: isInvalid ? Colors.red : Colors.white, width: 1),
+              ),
+            ),
           ),
         ),
-      ),
+        if (isInvalid)
+          const Padding(
+            padding: EdgeInsets.only(top: 6.0, left: 4.0),
+            child: Text(
+              'X  Please enter a valid email address.',
+              style: TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 }

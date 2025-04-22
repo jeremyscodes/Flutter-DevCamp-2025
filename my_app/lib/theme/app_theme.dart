@@ -5,8 +5,6 @@ final ThemeData appTheme = ThemeData(
   fontFamily: 'Poppins', // optional custom font
   useMaterial3: true,
 
-  // Define the default `TextTheme`. Use this to specify the default
-  // text styling for headlines, titles, bodies of text, and more.
   textTheme: TextTheme(
     // headline2
     displayMedium: GoogleFonts.roboto(
@@ -35,17 +33,5 @@ final ThemeData appTheme = ThemeData(
         letterSpacing: .41,
         color: const Color(0xFF8E8E93),
     ),
-
-
-    // displayLarge: const TextStyle(
-    //   fontSize: 72,
-    //   fontWeight: FontWeight.bold,
-    // ),
-    // titleLarge: GoogleFonts.oswald(
-    //   fontSize: 30,
-    //   fontStyle: FontStyle.italic,
-    // ),
-    // bodyMedium: GoogleFonts.merriweather(),
-    // displaySmall: GoogleFonts.pacifico(),
   ),
 );
